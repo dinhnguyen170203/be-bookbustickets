@@ -1,0 +1,22 @@
+{
+  "name": "be-bookbustickets",
+  "version": "1.0.0",
+  "description": "backend service for booking bus tickets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dinhnguyen170203/be-bookbustickets.git"
+  },
+  "author": "group cnpm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dinhnguyen170203/be-bookbustickets/issues"
+  },
+  "homepage": "https://github.com/dinhnguyen170203/be-bookbustickets#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
