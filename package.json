@@ -4,7 +4,8 @@
   "description": "backend service for booking bus tickets",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,14 @@
   },
   "homepage": "https://github.com/dinhnguyen170203/be-bookbustickets#readme",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "mongoose": "^7.2.0",
+    "nodemon": "^2.0.22",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "bcrypt": "^5.1.0",
+     "webpack": "^5.89.0",
+     "body-parser": "^1.20.2",
+     "cookie-parser": "^1.4.6"
   }
 }
