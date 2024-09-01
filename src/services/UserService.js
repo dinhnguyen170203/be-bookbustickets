@@ -150,6 +150,7 @@ const getAllUser = (limit, page, sort, filter) => {
   });
 };
 
+
 module.exports = {
   createUser,
   updateUser,
