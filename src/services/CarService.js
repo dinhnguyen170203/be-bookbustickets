@@ -174,7 +174,7 @@ const getCarsStatus = (limit, page, sort, filter, status) => {
         data: getCars,
         totalCars: count,
         maxPage: count < limit ? 1 : Math.ceil(count / limit),
-        pageCurrent: +page + 1,
+        // pageCurrent: +page + 1,
       });
     } catch (error) {
       reject(error);
