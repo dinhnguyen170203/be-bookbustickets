@@ -1,9 +1,9 @@
-const DriverService = require('../services/DriverService');
+const DepartService = require('../services/DepartureService');
 
-const createDriver = async (req, res) => {
+const createDeparture = async (req, res) => {
   try {
-    let newDriver = req.body;
-    let response = await DriverService.createDriver(newDriver);
+    let newDeparture = req.body;
+    let response = await DepartService.createDeparture(newDeparture);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -13,10 +13,10 @@ const createDriver = async (req, res) => {
   }
 };
 
-const updateDriver = async (req, res) => {
+const updateDeparture = async (req, res) => {
   try {
-    let data = req.body;
-    let response = await DriverService.updateDriver(data);
+    let departure = req.body;
+    let response = await DepartService.updateDeparture(departure);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -26,16 +26,16 @@ const updateDriver = async (req, res) => {
   }
 };
 
-const deleteDriver = async (req, res) => {
+const deleteDeparture = async (req, res) => {
   try {
     let id = req.params.id;
     if (!id) {
       return res.status(404).json({
         status: 'ERR',
-        message: 'Id is not required',
+        message: 'Departure id is  not required',
       });
     }
-    let response = await DriverService.deleteDriver(id);
+    let response = await DepartService.deleteDeparture(id);
     return res.status(200).json(response);
   } catch (e) {
     return res.status(404).json({
@@ -45,9 +45,9 @@ const deleteDriver = async (req, res) => {
   }
 };
 
-const getAllDriver = async (req, res) => {
+const getAllDeparture = async (req, res) => {
   try {
-    let response = await DriverService.getAllDriver();
+    let response = await DepartService.getAllDeparture();
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -58,8 +58,8 @@ const getAllDriver = async (req, res) => {
 };
 
 module.exports = {
-  createDriver,
-  updateDriver,
-  deleteDriver,
-  getAllDriver,
+  createDeparture,
+  updateDeparture,
+  deleteDeparture,
+  getAllDeparture,
 };

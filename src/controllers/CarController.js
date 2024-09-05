@@ -1,4 +1,4 @@
-const CarService = require('../service/CarService');
+const CarService = require('../services/CarService');
 
 const createCar = async (req, res) => {
   try {

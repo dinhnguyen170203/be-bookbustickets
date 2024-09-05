@@ -1,9 +1,9 @@
-const Destination = require('../models/DestinationModel');
+const Departure = require('../models/DepartureModel');
 
-const createDestination = (newDestination) => {
+const createDeparture = (newDeparture) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let { key, value, detail } = newDestination;
+      let { key, value, detail } = newDeparture;
       if (!key || !value) {
         resolve({
           status: 'ERR',
@@ -11,19 +11,19 @@ const createDestination = (newDestination) => {
         });
       }
 
-      let check = await Destination.findOne({
+      let check = await Departure.findOne({
         key,
       });
 
       if (check) {
         resolve({
           status: 'ERR',
-          message: 'Destination is already exits',
+          message: 'Departure is already exits',
         });
         return;
       }
 
-      let create = await Destination.create({
+      let create = await Departure.create({
         key,
         value,
         detail,
@@ -32,7 +32,7 @@ const createDestination = (newDestination) => {
       if (create) {
         resolve({
           status: 'OK',
-          message: 'Create Destination success',
+          message: 'Create departure success',
           data: create,
         });
       }
@@ -46,27 +46,27 @@ const createDestination = (newDestination) => {
   });
 };
 
-const updateDestination = (destination) => {
+const updateDeparture = (departure) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let { id, ...update } = destination;
+      let { id, ...update } = departure;
 
-      let check = await Destination.findOne({
+      let check = await Departure.findOne({
         _id: id,
       });
 
       if (!check) {
         resolve({
           status: 'ERR',
-          message: 'Destination is not exits',
+          message: 'Departure is not exits',
         });
       }
 
-      let action = await Destination.findByIdAndUpdate(id, update, { new: true });
+      let action = await Departure.findByIdAndUpdate(id, update, { new: true });
       if (action) {
         resolve({
           status: 'OK',
-          message: 'Update Destination user success!',
+          message: 'Update departure user success!',
           data: action,
         });
       }
@@ -80,25 +80,25 @@ const updateDestination = (destination) => {
   });
 };
 
-const deleteDestination = (id) => {
+const deleteDeparture = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let check = await Destination.findOne({
+      let check = await Departure.findOne({
         _id: id,
       });
 
       if (!check) {
         resolve({
           status: 'ERR',
-          message: 'Destination error',
+          message: 'Departure not exist',
         });
       }
 
-      let deleteDestination = await Destination.findByIdAndDelete(id);
-      if (deleteDestination) {
+      let deleteDeparture = await Departure.findByIdAndDelete(id);
+      if (deleteDeparture) {
         resolve({
           status: 'OK',
-          message: 'Delete Destination success!',
+          message: 'Delete departure success!',
         });
       }
     } catch (error) {
@@ -107,15 +107,14 @@ const deleteDestination = (id) => {
   });
 };
 
-const getAllDestination = () => {
+const getAllDeparture = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      let destinations = await Destination.find();
-
+      let departures = await Departure.find();
       resolve({
         status: 'OK',
-        message: 'Get all destination success!',
-        data: destinations,
+        message: 'Get all departure success!',
+        data: departures,
       });
     } catch (error) {
       reject(error);
@@ -124,8 +123,8 @@ const getAllDestination = () => {
 };
 
 module.exports = {
-  createDestination,
-  updateDestination,
-  deleteDestination,
-  getAllDestination,
+  createDeparture,
+  updateDeparture,
+  deleteDeparture,
+  getAllDeparture,
 };
