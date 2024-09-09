@@ -79,7 +79,7 @@ const updateCar = (car) => {
       let { id, ...update } = car;
 
       let check = await Car.findOne({
-        _id: id,
+        id_: id,
       });
 
       if (!check) {
