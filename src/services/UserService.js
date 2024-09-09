@@ -150,10 +150,173 @@ const getAllUser = (limit, page, sort, filter) => {
   });
 };
 
+const registerUser = (newUser) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          let { email, password, name, confirmPassword } = newUser
+
+          if(!email || !password || !name || !confirmPassword) {
+              resolve({
+                  status: 'ERR',
+                  message: 'Data is null'
+              })
+          }
+
+          const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+          const isCheckEmail = reg.test(email)
+
+          if(!isCheckEmail) { 
+              resolve({
+                  status: 'ERR',
+                  message: 'Email error'
+              })
+          }
+
+          if(password !== confirmPassword) {
+              resolve({
+                  status: 'ERR',
+                  message: 'Confirm Password error'
+              })
+              return
+          }
+
+          let checkUser = await User.findOne({
+              email: email
+          })
+
+          if(checkUser) {
+              resolve({
+                  status: 'ERR',
+                  message: 'User is exits'
+              })
+          }
+          // const otp = otpGenerator.generate(6, {
+          //     digits: true,
+          //     lowerCaseAlphabets: false,
+          //     upperCaseAlphabets: false,
+          //     specialChars: false,
+          // })
+          // const hashPassword = await bcrypt.hashSync(password, 10)
+
+          // await insertOtp({otp, email, hashPassword, name})
+          // let sendEmail = await sendOtpEmail({email, otp})
+          resolve({
+              status: 'OK',
+              message: 'Create otp success from resgister',
+              // otp,
+              // sendEmail
+          })
+      } catch (error) {
+          reject(error)
+      }
+  })
+}
+
+
+const verifyEmail = (email, otp) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          const checkOtp = await Otp.find({
+              email
+          })
+
+          if(!checkOtp.length) {
+              resolve({
+                  status: 'ERR',
+                  message: 'Email and otp not exist'
+              })
+          }
+
+          const lastOtp = checkOtp[checkOtp.length - 1]
+
+          const isValid = await isValidOtp(otp, lastOtp.otp)
+      
+          if(!isValid) {
+              resolve({
+                  status: 'ERR',
+                  message: 'Verify email ERROR'
+              })
+          }
+
+          if(isValid && email === lastOtp.email) {
+              const newUser = await User.create({
+                  email,
+                  name: lastOtp.name,
+                  password: lastOtp.password,
+              })
+
+              if(newUser) {
+                  await Otp.deleteMany({
+                      email
+                  })
+              }
+
+              resolve({
+                  status: 'OK',
+                  message: "Create user success",
+                  data: newUser
+              })
+          }
+      } catch (error) {
+          reject(error)
+      }
+  })
+}
+
+const loginUser = (userLogin) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          const {email, password} = userLogin
+
+          const checkUser = await User.findOne({
+              email: email
+          })
+
+          if(checkUser === null) {
+              resolve({
+                  status: 'ERR',
+                  message: 'The user is not defined'
+              })
+          }else {
+              const comparePassword = await bcrypt.compareSync(password, checkUser.password)
+
+              if(!comparePassword) {
+                  resolve({
+                      status: 'ERR',
+                      message: 'Password error',
+                  })
+              }else {
+
+                  const access_token = await generalAccessToken({
+                      id: checkUser.id,
+                      isAdmin: checkUser.isAdmin
+                  })
+
+                  const refresh_token = await generalRefreshToken({
+                      id: checkUser.id,
+                      isAdmin: checkUser.isAdmin
+                  })
+                   
+                  resolve({
+                      status: 'OK',
+                      message: 'Login success',
+                      access_token,
+                      refresh_token
+                  })
+              }
+          }
+      } catch (e) {
+          reject(e)
+      }
+  })
+}
 
 module.exports = {
   createUser,
   updateUser,
   deleteUser,
   getAllUser,
+  registerUser,
+  verifyEmail,
+  loginUser,
 };
