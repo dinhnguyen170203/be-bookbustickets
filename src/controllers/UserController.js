@@ -142,6 +142,33 @@ const refreshToken = async (req, res) => {
   }
 }
 
+const getDetailUser = async (req, res) => {
+  try {
+      let {id} = req.params
+      const data = await UserService.getDetailUser(id)
+      return res.status(200).json(data)
+  } catch (err) {
+      return res.status(404).json({
+          message: 'err from server',
+          error: err
+      })
+  }
+}
+
+const updatePassword = async (req, res) => {
+  try {
+      const { id, currentPassword, newPassword } = req.body
+      let data = await UserService.updatePassword(id, currentPassword, newPassword)
+
+      return res.status(200).json(data)
+  } catch (err) {
+      return res.status(404).json({
+          message: 'err from server',
+          error: err
+      })
+  }
+}
+
 module.exports = {
   createUser,
   updateUser,
@@ -151,4 +178,6 @@ module.exports = {
   verifyEmail,
   loginUser,
   refreshToken,
+  getDetailUser,
+  updatePassword,
 };

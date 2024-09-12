@@ -10,5 +10,7 @@ router.post('/refresh-token',  UserController.refreshToken)
 router.post('/register-user', UserController.registerUser)
 router.post('/verify-email',  UserController.verifyEmail)
 router.post('/login-user', UserController.loginUser)
+router.get('/get-detail-user/:id',  UserController.getDetailUser)
+router.post('/update-password',  UserController.updatePassword)
 
 module.exports = router

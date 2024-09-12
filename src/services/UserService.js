@@ -311,6 +311,95 @@ const loginUser = (userLogin) => {
   })
 }
 
+const getDetailUser = (idUser) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+         if(!idUser) {
+              resolve({
+                  status: 'ERR',
+                  message: "Data is null",
+              })
+         }
+
+         let user = await User.findOne({
+              _id: idUser
+         })
+
+         if(!user) {
+              resolve({
+                  status: 'ERR',
+                  message: "User is not exits",
+              })
+         }else {
+              resolve({
+                  status: 'OK',
+                  message: "Get detail user success",
+                  data: user
+              })
+         }
+      } catch (e) {
+          reject(e)
+      }
+  })
+}
+
+const updatePassword = (id, currentPassword, newPassword) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          if(!id || !currentPassword || !newPassword) {
+              resolve({
+                  status: 'ERR',
+                  message: 'Data user is null'
+              })
+          }
+
+          const checkUser = await User.findOne({
+              _id: id
+          })
+
+          if(!checkUser) {
+              resolve({
+                  status: 'ERR',
+                  message: 'The user is not defined'
+              })
+          }else {
+              const compareCurrentPassword = await bcrypt.compareSync(currentPassword, checkUser.password)
+              if(!compareCurrentPassword) {
+                  resolve({
+                      status: 'ERR',
+                      message: 'Verify password current is false',
+                  })
+              }
+
+              const comparePassword = bcrypt.compareSync(newPassword, checkUser.password)
+
+              if(comparePassword) {
+                  resolve({
+                      status: 'ERR',
+                      message: 'Nothing changes',
+                  })
+              }else {
+                  const hash = bcrypt.hashSync(newPassword, 10)
+
+                  const update = await User.findByIdAndUpdate(id, {
+                      'password': hash
+                  }, { new: true })
+                   
+                  resolve({
+                      status: 'OK',
+                      message: 'Update password success',
+                      update
+                  })
+              }
+          }
+          
+
+      } catch (e) {
+          reject(e)
+      }
+  })
+}
+
 module.exports = {
   createUser,
   updateUser,
@@ -319,4 +408,6 @@ module.exports = {
   registerUser,
   verifyEmail,
   loginUser,
+  getDetailUser,
+  updatePassword,
 };
