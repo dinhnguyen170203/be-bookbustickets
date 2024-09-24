@@ -1,6 +1,12 @@
-const User = require('../models/UserModel');
-const bcrypt = require('bcrypt');
-
+const bcrypt = require("bcrypt")
+const User = require("../models/UserModel")
+const Otp = require("../models/OtpModel")
+const otpGenerator = require('otp-generator')
+const { insertOtp, isValidOtp } = require("./OtpService")
+const { sendOtpEmail } = require("./EmailService")
+const { generalAccessToken, generalRefreshToken } = require("./JwtService")
+const cloudinary = require('cloudinary').v2;
+const { v4: uuidv4 } = require('uuid');
 const createUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
     try {

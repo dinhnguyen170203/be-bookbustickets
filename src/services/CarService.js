@@ -1,5 +1,6 @@
 const Car = require('../models/CarModel');
 const StatusCar = require('../models/StatusCarModel');
+const cloudinary = require('cloudinary').v2;
 
 const createCar = (newCar, fileData) => {
   return new Promise(async (resolve, reject) => {
@@ -7,18 +8,15 @@ const createCar = (newCar, fileData) => {
       let { name, licensePlate, numberOfSeats, yearOfManufacture, type, color, status, note } =
         newCar;
       if (
-        !name ||
-        !licensePlate ||
-        !numberOfSeats ||
-        !yearOfManufacture ||
-        !type ||
-        !color ||
-        !status
+        (!name ||
+          !licensePlate ||
+          !numberOfSeats ||
+          !yearOfManufacture ||
+          !type ||
+          !color ||
+          !status) &&
+        !fileData
       ) {
-        if (fileData) {
-          cloudinary.uploader.destroy(fileData.filename);
-        }
-
         resolve({
           status: 'ERR',
           message: 'Data is null',
@@ -30,13 +28,9 @@ const createCar = (newCar, fileData) => {
       });
 
       if (check) {
-        if (fileData) {
-          cloudinary.uploader.destroy(fileData.filename);
-        }
-
         resolve({
           status: 'ERR',
-          message: 'Car is already exits',
+          message: 'Car exits',
         });
       }
 
@@ -60,20 +54,13 @@ const createCar = (newCar, fileData) => {
         });
       }
     } catch (error) {
-      if (fileData) {
-        cloudinary.uploader.destroy(fileData.filename);
-      }
-
-      resolve({
-        status: 'ERR',
-        message: 'ERR SYXTAX',
-        error,
-      });
+      console.log('ERR createCar.Service', error);
+      reject(error);
     }
   });
 };
 
-const updateCar = (car) => {
+const updateCar = (car, fileData) => {
   return new Promise(async (resolve, reject) => {
     try {
       let { id, ...update } = car;
@@ -88,8 +75,12 @@ const updateCar = (car) => {
           message: 'Car is not exits',
         });
       }
+      if (fileData !== null) {
+        cloudinary.uploader.destroy(check.image);
+      }
 
-      let action = await Car.findByIdAndUpdate(id, update, { new: true });
+      let action = await Car.findByIdAndUpdate(id, update, fileData, { new: true });
+
       if (action) {
         resolve({
           status: 'OK',
@@ -98,11 +89,8 @@ const updateCar = (car) => {
         });
       }
     } catch (error) {
-      resolve({
-        status: 'ERR',
-        message: 'ERR SYXTAX',
-        error,
-      });
+      console.log('ERR updateCar.Service', error);
+      reject(error);
     }
   });
 };
@@ -117,11 +105,14 @@ const deleteCar = (id) => {
       if (!check) {
         resolve({
           status: 'ERR',
-          message: 'Car error',
+          message: 'Car not exist',
         });
+      } else {
+        cloudinary.uploader.destroy(check.image);
       }
 
       let deleteCar = await Car.findByIdAndDelete(id);
+
       if (deleteCar) {
         resolve({
           status: 'OK',
@@ -129,6 +120,7 @@ const deleteCar = (id) => {
         });
       }
     } catch (error) {
+      console.log('ERR delete.Service', error);
       reject(error);
     }
   });
@@ -139,7 +131,6 @@ const getAllCar = (limit, page, sort, filter) => {
     try {
       let count = await Car.count();
       let getCars = await Car.find()
-        .populate('status')
         .limit(limit)
         .skip(limit * page);
 
@@ -170,7 +161,7 @@ const getCarsStatus = (limit, page, sort, filter, status) => {
 
       resolve({
         status: 'OK',
-        message: 'Get all car success!',
+        message: 'Get all car status success!',
         data: getCars,
         totalCars: count,
         maxPage: count < limit ? 1 : Math.ceil(count / limit),

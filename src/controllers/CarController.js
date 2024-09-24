@@ -17,9 +17,11 @@ const createCar = async (req, res) => {
 
 const updateCar = async (req, res) => {
   try {
-    console.log('update-car', req.body);
+    // console.log('file-update', req.file);
+    // console.log('update-car', req.body);
+    const fileData = req.file;
     let car = req.body;
-    let response = await CarService.updateCar(car);
+    let response = await CarService.updateCar(car, fileData);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
