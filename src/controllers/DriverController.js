@@ -17,8 +17,11 @@ const createDriver = async (req, res) => {
 
 const updateDriver = async (req, res) => {
   try {
+    console.log('UpdateDriver.Controller:', req.params.id, req.file, req.body);
+    let id = req.params.id;
+    let fileImage = req.file;
     let data = req.body;
-    let response = await DriverService.updateDriver(data);
+    let response = await DriverService.updateDriver(id, data, fileImage);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({

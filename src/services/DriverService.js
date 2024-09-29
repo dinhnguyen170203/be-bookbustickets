@@ -79,10 +79,10 @@ const createDriver = (newDriver, fileData) => {
   });
 };
 
-const updateDriver = (driver) => {
+const updateDriver = (id, driver, fileImage) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let { id, ...update } = driver;
+      let { image, ...update } = driver;
       let check = await Driver.findOne({
         _id: id,
       });
@@ -93,7 +93,7 @@ const updateDriver = (driver) => {
           message: 'Driver is not exits',
         });
       }
-
+      image = fileImage?.path;
       let action = await Driver.findByIdAndUpdate(id, update, { new: true });
       if (action) {
         resolve({
