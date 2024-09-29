@@ -74,13 +74,13 @@ const createCar = (newCar, fileData) => {
   });
 };
 
-const updateCar = (car) => {
+const updateCar = (idCar, car, fileData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let { id, ...update } = car;
+      let { image, ...update } = car;
 
       let check = await Car.findOne({
-        _id: id,
+        _id: idCar,
       });
 
       if (!check) {
@@ -89,8 +89,8 @@ const updateCar = (car) => {
           message: 'Car is not exits',
         });
       }
-
-      let action = await Car.findByIdAndUpdate(id, update, { new: true });
+      image = fileData?.path;
+      let action = await Car.findByIdAndUpdate(idCar, update, { new: true });
       if (action) {
         resolve({
           status: 'OK',
@@ -99,6 +99,7 @@ const updateCar = (car) => {
         });
       }
     } catch (error) {
+      console.log('err Service.updateCar', error);
       resolve({
         status: 'ERR',
         message: 'ERR SYXTAX',
