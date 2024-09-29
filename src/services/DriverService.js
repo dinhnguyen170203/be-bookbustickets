@@ -1,25 +1,34 @@
 const Driver = require('../models/DriverModel');
+const cloudinary = require('cloudinary').v2;
 
-const createDriver = (newDriver) => {
+const createDriver = (newDriver, fileData) => {
   return new Promise(async (resolve, reject) => {
+    console.log('res.body CreateDriver.Service', newDriver);
+    console.log('file.path CreateDriver.Service', fileData.path);
     try {
       let {
         idNumber,
         name,
         address,
         phoneNumber,
+        // dateOfBirth,
         personalInformation,
-        identification,
+        image,
         workHistory,
       } = newDriver;
       if (
+        !idNumber ||
         !name ||
         !address ||
         !phoneNumber ||
-        !identification ||
+        !image ||
         !personalInformation ||
+        // !dateOfBirth ||
         !workHistory
       ) {
+        if (fileData) {
+          cloudinary.uploader.destroy(fileData.filename);
+        }
         resolve({
           status: 'ERR',
           message: 'Data is null',
@@ -31,6 +40,9 @@ const createDriver = (newDriver) => {
       });
 
       if (check) {
+        if (fileData) {
+          cloudinary.uploader.destroy(fileData.filename);
+        }
         resolve({
           status: 'ERR',
           message: 'Driver is already exits',
@@ -44,7 +56,8 @@ const createDriver = (newDriver) => {
         address,
         phoneNumber,
         personalInformation,
-        identification,
+        // dateOfBirth,
+        image: fileData?.path,
         workHistory,
       });
 
@@ -56,6 +69,7 @@ const createDriver = (newDriver) => {
         });
       }
     } catch (error) {
+      console.log('error createDriver.Service:', error);
       resolve({
         status: 'ERR',
         message: 'ERR SYXTAX',
@@ -136,9 +150,9 @@ const getAllDriver = (page, limit, filter, sort) => {
       resolve({
         status: 'OK',
         message: 'Get all Driver success!',
-        data: Drivers,
+        data: getDrivers,
         maxPage: count < limit ? 1 : Math.ceil(count / limit),
-        // currentPage: page,
+        currentPage: +page + 1,
         totalDriver: count,
       });
     } catch (error) {

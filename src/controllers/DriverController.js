@@ -2,8 +2,10 @@ const DriverService = require('../services/DriverService');
 
 const createDriver = async (req, res) => {
   try {
+    const fileData = req.file;
+    console.log('file image Driver', fileData);
     let newDriver = req.body;
-    let response = await DriverService.createDriver(newDriver);
+    let response = await DriverService.createDriver(newDriver, fileData);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({
@@ -47,9 +49,11 @@ const deleteDriver = async (req, res) => {
 
 const getAllDriver = async (req, res) => {
   try {
-    let response = await DriverService.getAllDriver();
+    let { limit, page, sort, filter } = req.query;
+    let response = await DriverService.getAllDriver(limit || 8, page || 0, sort, filter);
     return res.status(200).json(response);
   } catch (error) {
+    console.log('error Controller.GetAllDriver:', error);
     return res.status(404).json({
       status: 'ERR',
       message: 'ERROR FROM SERVER',

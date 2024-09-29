@@ -8,15 +8,18 @@ const createCar = (newCar, fileData) => {
       let { name, licensePlate, numberOfSeats, yearOfManufacture, type, color, status, note } =
         newCar;
       if (
-        (!name ||
-          !licensePlate ||
-          !numberOfSeats ||
-          !yearOfManufacture ||
-          !type ||
-          !color ||
-          !status) &&
-        !fileData
+        !name ||
+        !licensePlate ||
+        !numberOfSeats ||
+        !yearOfManufacture ||
+        !type ||
+        !color ||
+        !status
       ) {
+        if (fileData) {
+          cloudinary.uploader.destroy(fileData.filename);
+        }
+
         resolve({
           status: 'ERR',
           message: 'Data is null',
@@ -28,9 +31,13 @@ const createCar = (newCar, fileData) => {
       });
 
       if (check) {
+        if (fileData) {
+          cloudinary.uploader.destroy(fileData.filename);
+        }
+
         resolve({
           status: 'ERR',
-          message: 'Car exits',
+          message: 'Car is already exits',
         });
       }
 
@@ -54,19 +61,26 @@ const createCar = (newCar, fileData) => {
         });
       }
     } catch (error) {
-      console.log('ERR createCar.Service', error);
-      reject(error);
+      if (fileData) {
+        cloudinary.uploader.destroy(fileData.filename);
+      }
+
+      resolve({
+        status: 'ERR',
+        message: 'ERR SYXTAX',
+        error,
+      });
     }
   });
 };
 
-const updateCar = (car, fileData) => {
+const updateCar = (idCar, car, fileData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let { id, ...update } = car;
+      let { image, ...update } = car;
 
       let check = await Car.findOne({
-        id_: id,
+        _id: idCar,
       });
 
       if (!check) {
@@ -75,12 +89,8 @@ const updateCar = (car, fileData) => {
           message: 'Car is not exits',
         });
       }
-      if (fileData !== null) {
-        cloudinary.uploader.destroy(check.image);
-      }
-
-      let action = await Car.findByIdAndUpdate(id, update, fileData, { new: true });
-
+      image = fileData?.path;
+      let action = await Car.findByIdAndUpdate(idCar, update, { new: true });
       if (action) {
         resolve({
           status: 'OK',
@@ -89,8 +99,12 @@ const updateCar = (car, fileData) => {
         });
       }
     } catch (error) {
-      console.log('ERR updateCar.Service', error);
-      reject(error);
+      console.log('err Service.updateCar', error);
+      resolve({
+        status: 'ERR',
+        message: 'ERR SYXTAX',
+        error,
+      });
     }
   });
 };

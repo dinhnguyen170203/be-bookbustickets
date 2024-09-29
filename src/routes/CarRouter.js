@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const CarController = require('../controllers/CarController');
+const uploadCloud = require('../Middleware/uploadFile');
 
-// router.post('/create-car', CarController.createCar);
-router.post('/update-car', CarController.updateCar);
+router.post('/create-car', uploadCloud.single('image'), CarController.createCar);
+router.post('/update-car/:id', CarController.updateCar);
 router.delete('/delete-car/:id', CarController.deleteCar);
 router.get('/get-all-car', CarController.getAllCar);
 router.get('/get-cars-status', CarController.getCarsStatus);
