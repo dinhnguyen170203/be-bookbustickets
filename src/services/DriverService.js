@@ -3,28 +3,12 @@ const cloudinary = require('cloudinary').v2;
 
 const createDriver = (newDriver, fileData) => {
   return new Promise(async (resolve, reject) => {
-    console.log('res.body CreateDriver.Service', newDriver);
-    console.log('file.path CreateDriver.Service', fileData.path);
+    console.log('newDriver', newDriver);
     try {
-      let {
-        idNumber,
-        name,
-        address,
-        phoneNumber,
-        // dateOfBirth,
-        personalInformation,
-        image,
-        workHistory,
-      } = newDriver;
-      if (
-        !idNumber ||
-        !name ||
-        !address ||
-        !phoneNumber ||
-        !image ||
-        !personalInformation ||
-        // !dateOfBirth ||
-        !workHistory
+      let { idNumber, name,  address, phoneNumber,  personalInformation, workHistory} = newDriver;
+      
+      if (  !idNumber ||    !name || !address || !phoneNumber  || !personalInformation || !workHistory
+        // !dateOfBirth | 
       ) {
         if (fileData) {
           cloudinary.uploader.destroy(fileData.filename);
