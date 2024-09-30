@@ -27,7 +27,22 @@ const updateUser = async (req, res) => {
     });
   }
 };
+const updateUserService = async (req, res) => {
+  try {
+    console.log("1");
 
+    let user = req.body;
+    console.log("user 1: ",user);
+    
+    let responve = await UserService.updateUserService(user);
+    return res.status(200).json(responve);
+  } catch (error) {
+    return res.status(404).json({
+      status: 'ERR',
+      message: 'ERROR FROM SERVER',
+    });
+  }
+};
 const deleteUser = async (req, res) => {
   try {
     let userId = req.params.id;
@@ -155,6 +170,19 @@ const getDetailUser = async (req, res) => {
   }
 }
 
+const getDetailUserClient = async (req, res) => {
+  try {
+      let {id} = req.params
+      const data = await UserService.getDetailUserClient(id)
+      return res.status(200).json(data)
+  } catch (err) {
+      return res.status(404).json({
+          message: 'err from server',
+          error: err
+      })
+  }
+}
+
 const updatePassword = async (req, res) => {
   try {
       const { id, currentPassword, newPassword } = req.body
@@ -180,4 +208,6 @@ module.exports = {
   refreshToken,
   getDetailUser,
   updatePassword,
+  getDetailUserClient,
+  updateUserService
 };

@@ -7,7 +7,7 @@ const driverSchema = new mongoose.Schema({
   // dateOfBirth: { type: Date, require: true },
   phoneNumber: { type: String, require: true },
   personalInformation: { type: String, require: true },
-  image: { type: String, require: true },
+  image: { type: String, require: false },
   workHistory: { type: String, require: true },
   // workSchedule: { type: String, require: true },
 });

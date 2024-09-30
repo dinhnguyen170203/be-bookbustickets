@@ -95,10 +95,10 @@ const deleteUser = (userId) => {
 const updateUser = (user, fileData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let { idUser, ...update } = user;
+      let { _id, ...update } = user;
 
       let check = await User.findOne({
-        _id: idUser,
+        _id: _id,
       });
 
       if (!check) {
@@ -112,7 +112,7 @@ const updateUser = (user, fileData) => {
         });
       }
 
-      let action = await User.findByIdAndUpdate(idUser, update, { new: true });
+      let action = await User.findByIdAndUpdate(_id, update, { new: true });
       if (action) {
         resolve({
           status: 'OK',
@@ -124,6 +124,43 @@ const updateUser = (user, fileData) => {
       if (fileData) {
         cloudinary.uploader.destroy(fileData.filename);
       }
+
+      resolve({
+        status: 'ERR',
+        message: 'ERR SYXTAX',
+        error,
+      });
+    }
+  });
+};
+
+const updateUserService = (user) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log("user: ", user);
+      
+      let { _id, ...update } = user;
+
+      let check = await User.findOne({
+        _id: _id,
+      });
+
+      if (!check) {
+        resolve({
+          status: 'ERR',
+          message: 'User is not exits',
+        });
+      }
+
+      let action = await User.findByIdAndUpdate(_id, update, { new: true });
+      if (action) {
+        resolve({
+          status: 'OK',
+          message: 'Update user user success!',
+          data: action,
+        });
+      }
+    } catch (error) {
 
       resolve({
         status: 'ERR',
@@ -349,6 +386,38 @@ const getDetailUser = (idUser) => {
   })
 }
 
+const getDetailUserClient = (idUser) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+         if(!idUser) {
+              resolve({
+                  status: 'ERR',
+                  message: "Data is null",
+              })
+         }
+
+         let user = await User.findOne({
+              _id: idUser
+         })
+
+         if(!user) {
+              resolve({
+                  status: 'ERR',
+                  message: "User is not exits",
+              })
+         }else {
+              resolve({
+                  status: 'OK',
+                  message: "Get detail user success",
+                  data: user
+              })
+         }
+      } catch (e) {
+          reject(e)
+      }
+  })
+}
+
 const updatePassword = (id, currentPassword, newPassword) => {
   return new Promise(async (resolve, reject) => {
       try {
@@ -416,4 +485,6 @@ module.exports = {
   loginUser,
   getDetailUser,
   updatePassword,
+  getDetailUserClient,
+  updateUserService
 };

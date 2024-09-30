@@ -3,7 +3,6 @@ const DriverService = require('../services/DriverService');
 const createDriver = async (req, res) => {
   try {
     const fileData = req.file;
-    console.log('file image Driver', fileData);
     let newDriver = req.body;
     let response = await DriverService.createDriver(newDriver, fileData);
     return res.status(200).json(response);
