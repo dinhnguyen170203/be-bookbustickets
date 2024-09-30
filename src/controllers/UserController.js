@@ -12,7 +12,20 @@ const createUser = async (req, res) => {
     });
   }
 };
-
+const logoutUser = async (req, res) => {
+  try {
+      res.clearCookie('refresh_token')
+      return res.status(200).json({
+          status: 'OK',
+          message: 'Logout successfully'
+      })
+  } catch (err) {
+      return res.status(404).json({
+          message: 'err from server',
+          error: err
+      })
+  }
+}
 const updateUser = async (req, res) => {
   try {
     const fileData = req.file;
@@ -29,10 +42,7 @@ const updateUser = async (req, res) => {
 };
 const updateUserService = async (req, res) => {
   try {
-    console.log("1");
-
     let user = req.body;
-    console.log("user 1: ",user);
     
     let responve = await UserService.updateUserService(user);
     return res.status(200).json(responve);
@@ -209,5 +219,6 @@ module.exports = {
   getDetailUser,
   updatePassword,
   getDetailUserClient,
-  updateUserService
+  updateUserService,
+  logoutUser
 };
