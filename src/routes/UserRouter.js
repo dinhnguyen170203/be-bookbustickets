@@ -16,5 +16,6 @@ router.post('/login-user', UserController.loginUser)
 router.get('/get-detail-user/:id',  UserController.getDetailUser)
 router.get('/get-detail-user-client/:id',  UserController.getDetailUserClient)
 router.post('/update-password',  UserController.updatePassword)
+router.post('/logout-user',  UserController.logoutUser)
 
 module.exports = router
