@@ -6,6 +6,7 @@ const DriverRouter = require('./DriverRouter');
 const TripRouter = require('./TripRouter');
 const StatisticRouter = require('./StatisticRouter');
 const PaymentRouter = require('./PaymentRouter');
+const TicketRouter = require('./TicketRouter');
 
 const routes = (app) => {
   app.use('/api/user', UserRouter);
@@ -16,6 +17,7 @@ const routes = (app) => {
   app.use('/api/trip', TripRouter);
   app.use('/api/statistic', StatisticRouter);
   app.use('/api/payment', PaymentRouter);
+  app.use('/api/ticket', TicketRouter);
   app.use((req, res, next) => {
     try {
       res.status(404);
