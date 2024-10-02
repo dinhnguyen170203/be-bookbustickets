@@ -3,7 +3,6 @@ const cloudinary = require('cloudinary').v2;
 
 const createDriver = (newDriver, fileData) => {
   return new Promise(async (resolve, reject) => {
-    console.log('newDriver', newDriver);
     try {
       let { idNumber, name,  address, phoneNumber,  personalInformation, workHistory} = newDriver;
       

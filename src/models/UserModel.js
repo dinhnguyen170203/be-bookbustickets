@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema(
         address: { type: String, required: false },
         access_token: { type: String, required: false },
         refresh_token: { type: String, required: false },
+        accountLock: {
+          isLocked: { type: Boolean, default: false },
+          lockUntil: { type: Date, default: null },
+          lockReason: { type: String, default: '' } 
+        }
       },
       {
         timestamps: true,

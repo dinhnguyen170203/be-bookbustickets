@@ -137,8 +137,6 @@ const updateUser = (user, fileData) => {
 const updateUserService = (user) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("user: ", user);
-      
       let { _id, ...update } = user;
 
       let check = await User.findOne({
@@ -475,6 +473,69 @@ const updatePassword = (id, currentPassword, newPassword) => {
   })
 }
 
+const lockUserAccount = (userId, type, lockDuration, lockReason) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!userId || !type || !lockDuration) {
+        resolve({
+          status: 'ERR',
+          message: "Data is null"
+      })
+      }
+      const lockUntil = new Date();
+      const lockDurationInMinutes = 0
+      if(type === "minutes") {
+        lockDurationInMinutes = lockDuration
+      }else {
+        lockDurationInMinutes = parseInt(lockDuration) * 60;
+      }
+      
+      lockUntil.setMinutes(lockUntil.getMinutes() + lockDurationInMinutes);
+    
+      await User.findByIdAndUpdate(userId, {
+        accountLock: {
+          isLocked: true,
+          lockUntil: lockUntil,
+          lockReason: lockReason
+        }
+      });
+    
+      resolve({
+        status: 'OK',
+        message: 'Khóa tài khoản thành công'
+    })
+    } catch (error) {
+      resolve({
+        status: 'ERR',
+        error
+    })
+    }
+  })
+}
+
+const checkAccountStatus = async (req, res, next) => {
+  const { _id } = req.body;
+  const user = await User.findOne({ _id });
+
+  if (!user) {
+    return res.status(404).json({ message: 'Người dùng không tồn tại' });
+  }
+
+  const { isLocked, lockUntil, lockReason } = user.accountLock;
+
+  if (isLocked && lockUntil > new Date()) {
+    return res.status(403).json({ message: `Tài khoản của bạn đang bị khóa. Lý do: ${lockReason}` });
+  } else if (isLocked && lockUntil <= new Date()) {
+    await User.findByIdAndUpdate(user.id, {
+      'accountLock.isLocked': false,
+      'accountLock.lockUntil': null,
+      'accountLock.lockReason': ''
+    });
+  }
+
+  next();
+};
+
 module.exports = {
   createUser,
   updateUser,
@@ -486,5 +547,7 @@ module.exports = {
   getDetailUser,
   updatePassword,
   getDetailUserClient,
-  updateUserService
+  updateUserService,
+  lockUserAccount,
+  checkAccountStatus
 };

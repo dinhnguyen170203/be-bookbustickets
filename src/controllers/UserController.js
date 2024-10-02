@@ -207,6 +207,19 @@ const updatePassword = async (req, res) => {
   }
 }
 
+const lockUserAccount = async (req, res) => {
+  try {
+    let {userId, type, lockDuration, lockReason} = req.body.user;
+    let responve = await UserService.lockUserAccount(userId, type, lockDuration, lockReason);
+    return res.status(200).json(responve);
+  } catch (error) {
+    return res.status(404).json({
+      status: 'ERR',
+      message: 'ERROR FROM SERVER',
+    });
+  }
+};
+
 module.exports = {
   createUser,
   updateUser,
@@ -220,5 +233,6 @@ module.exports = {
   updatePassword,
   getDetailUserClient,
   updateUserService,
-  logoutUser
+  logoutUser,
+  lockUserAccount
 };
