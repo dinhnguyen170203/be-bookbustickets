@@ -209,7 +209,8 @@ const updatePassword = async (req, res) => {
 
 const lockUserAccount = async (req, res) => {
   try {
-    let {userId, type, lockDuration, lockReason} = req.body.user;
+    let {userId, type, lockDuration, lockReason} = req.body;
+
     let responve = await UserService.lockUserAccount(userId, type, lockDuration, lockReason);
     return res.status(200).json(responve);
   } catch (error) {

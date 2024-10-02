@@ -483,15 +483,17 @@ const lockUserAccount = (userId, type, lockDuration, lockReason) => {
       })
       }
       const lockUntil = new Date();
-      const lockDurationInMinutes = 0
+      let lockDurationInMinutes = 0
       if(type === "minutes") {
         lockDurationInMinutes = lockDuration
-      }else {
+      }else if(type === "hours"){
         lockDurationInMinutes = parseInt(lockDuration) * 60;
+      }else {
+        lockDurationInMinutes = parseInt(lockDuration) * 24 * 60;
       }
       
       lockUntil.setMinutes(lockUntil.getMinutes() + lockDurationInMinutes);
-    
+      
       await User.findByIdAndUpdate(userId, {
         accountLock: {
           isLocked: true,
@@ -514,17 +516,22 @@ const lockUserAccount = (userId, type, lockDuration, lockReason) => {
 }
 
 const checkAccountStatus = async (req, res, next) => {
-  const { _id } = req.body;
-  const user = await User.findOne({ _id });
-
+  const { email } = req.body;
+  const user = await User.findOne({ email: email});
+  
   if (!user) {
-    return res.status(404).json({ message: 'Người dùng không tồn tại' });
+    return res.status(200).json({ 
+      status: 'ERR',
+      message: 'Người dùng không tồn tại' });
   }
 
   const { isLocked, lockUntil, lockReason } = user.accountLock;
 
   if (isLocked && lockUntil > new Date()) {
-    return res.status(403).json({ message: `Tài khoản của bạn đang bị khóa. Lý do: ${lockReason}` });
+    return res.status(200).json({ 
+      status: "E1",
+      message: `Tài khoản của bạn đang bị khóa trong thời gian ${lockUntil} phút. Lý do: ${lockReason}` 
+    });
   } else if (isLocked && lockUntil <= new Date()) {
     await User.findByIdAndUpdate(user.id, {
       'accountLock.isLocked': false,
