@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const driverSchema = new mongoose.Schema({
-  idNumber: { type: String, require: false },
+  idNumber: { type: String, require: true, unique: true },
   name: { type: String, require: true },
   address: { type: String, require: true },
   // dateOfBirth: { type: Date, require: true },

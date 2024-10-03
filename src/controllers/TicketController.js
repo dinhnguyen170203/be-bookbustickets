@@ -58,9 +58,23 @@ const getAllTicketFromUser = async (req, res) => {
   }
 };
 
+const getAllTicket = async (req, res) => {
+  try {
+    let { limit, page, sort, filter } = req.query;
+    let response = await TicketService.getAllTicket(limit || 6, page || 0, sort, filter);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.log('err getAllTicket.Controller', error);
+    return res.status(404).json({
+      status: 'ERR',
+      message: 'ERROR FROM SERVER',
+    });
+  }
+};
 module.exports = {
   createTicket,
   updateTicket,
   deleteTicket,
   getAllTicketFromUser,
+  getAllTicket,
 };
