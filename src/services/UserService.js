@@ -1,10 +1,10 @@
-const bcrypt = require("bcrypt")
-const User = require("../models/UserModel")
-const Otp = require("../models/OtpModel")
-const otpGenerator = require('otp-generator')
-const { insertOtp, isValidOtp } = require("./OtpService")
-const { sendOtpEmail } = require("./EmailService")
-const { generalAccessToken, generalRefreshToken } = require("./JwtService")
+const bcrypt = require('bcrypt');
+const User = require('../models/UserModel');
+const Otp = require('../models/OtpModel');
+const otpGenerator = require('otp-generator');
+const { insertOtp, isValidOtp } = require('./OtpService');
+const { sendOtpEmail } = require('./EmailService');
+const { generalAccessToken, generalRefreshToken } = require('./JwtService');
 const cloudinary = require('cloudinary').v2;
 const { v4: uuidv4 } = require('uuid');
 const createUser = (newUser) => {
@@ -159,7 +159,6 @@ const updateUserService = (user) => {
         });
       }
     } catch (error) {
-
       resolve({
         status: 'ERR',
         message: 'ERR SYXTAX',
@@ -193,350 +192,361 @@ const getAllUser = (limit, page, sort, filter) => {
 
 const registerUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          let { email, password, name, confirmPassword } = newUser
+    try {
+      let { email, password, name, confirmPassword } = newUser;
 
-          if(!email || !password || !name || !confirmPassword) {
-              resolve({
-                  status: 'ERR',
-                  message: 'Data is null'
-              })
-          }
-
-          const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
-          const isCheckEmail = reg.test(email)
-
-          if(!isCheckEmail) { 
-              resolve({
-                  status: 'ERR',
-                  message: 'Email error'
-              })
-          }
-
-          if(password !== confirmPassword) {
-              resolve({
-                  status: 'ERR',
-                  message: 'Confirm Password error'
-              })
-              return
-          }
-
-          let checkUser = await User.findOne({
-              email: email
-          })
-
-          if(checkUser) {
-              resolve({
-                  status: 'ERR',
-                  message: 'User is exits'
-              })
-          }
-          // const otp = otpGenerator.generate(6, {
-          //     digits: true,
-          //     lowerCaseAlphabets: false,
-          //     upperCaseAlphabets: false,
-          //     specialChars: false,
-          // })
-          // const hashPassword = await bcrypt.hashSync(password, 10)
-
-          // await insertOtp({otp, email, hashPassword, name})
-          // let sendEmail = await sendOtpEmail({email, otp})
-          resolve({
-              status: 'OK',
-              message: 'Create otp success from resgister',
-              // otp,
-              // sendEmail
-          })
-      } catch (error) {
-          reject(error)
+      if (!email || !password || !name || !confirmPassword) {
+        resolve({
+          status: 'ERR',
+          message: 'Data is null',
+        });
+        return;
       }
-  })
-}
 
+      const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+      const isCheckEmail = reg.test(email);
+
+      if (!isCheckEmail) {
+        reject({
+          status: 'ERR',
+          message: 'Email error',
+        });
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        resolve({
+          status: 'ERR',
+          message: 'Confirm Password error',
+        });
+        return;
+      }
+
+      let checkUser = await User.findOne({
+        email: email,
+      });
+
+      if (checkUser) {
+        resolve({
+          status: 'ERR',
+          message: 'User already exists',
+        });
+        return;
+      }
+
+      const otp = otpGenerator.generate(6, {
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+      });
+
+      const hashPassword = await bcrypt.hash(password, 10);
+
+      await insertOtp({ otp, email, hashPassword, name });
+
+      await sendOtpEmail({ email, otp });
+
+      resolve({
+        status: 'OK',
+        message: 'Create OTP success from register',
+        otp,
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 const verifyEmail = (email, otp) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          const checkOtp = await Otp.find({
-              email
-          })
+    try {
+      const checkOtp = await Otp.find({
+        email,
+      });
 
-          if(!checkOtp.length) {
-              resolve({
-                  status: 'ERR',
-                  message: 'Email and otp not exist'
-              })
-          }
-
-          const lastOtp = checkOtp[checkOtp.length - 1]
-
-          const isValid = await isValidOtp(otp, lastOtp.otp)
-      
-          if(!isValid) {
-              resolve({
-                  status: 'ERR',
-                  message: 'Verify email ERROR'
-              })
-          }
-
-          if(isValid && email === lastOtp.email) {
-              const newUser = await User.create({
-                  email,
-                  name: lastOtp.name,
-                  password: lastOtp.password,
-              })
-
-              if(newUser) {
-                  await Otp.deleteMany({
-                      email
-                  })
-              }
-
-              resolve({
-                  status: 'OK',
-                  message: "Create user success",
-                  data: newUser
-              })
-          }
-      } catch (error) {
-          reject(error)
+      if (!checkOtp.length) {
+        resolve({
+          status: 'ERR',
+          message: 'Email and otp not exist',
+        });
       }
-  })
-}
+
+      const lastOtp = checkOtp[checkOtp.length - 1];
+
+      const isValid = await isValidOtp(otp, lastOtp.otp);
+
+      if (!isValid) {
+        resolve({
+          status: 'ERR',
+          message: 'Verify email ERROR',
+        });
+        return;
+      }
+
+      if (isValid && email === lastOtp.email) {
+        const newUser = await User.create({
+          email,
+          name: lastOtp.name,
+          password: lastOtp.password,
+        });
+
+        if (newUser) {
+          await Otp.deleteMany({
+            email,
+          });
+        }
+
+        resolve({
+          status: 'OK',
+          message: 'Create user success',
+          data: newUser,
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 const loginUser = (userLogin) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          const {email, password} = userLogin
+    try {
+      const { email, password } = userLogin;
 
-          const checkUser = await User.findOne({
-              email: email
-          })
+      const checkUser = await User.findOne({
+        email: email,
+      });
 
-          if(checkUser === null) {
-              resolve({
-                  status: 'ERR',
-                  message: 'The user is not defined'
-              })
-          }else {
-              const comparePassword = await bcrypt.compareSync(password, checkUser.password)
+      if (checkUser === null) {
+        resolve({
+          status: 'ERR',
+          message: 'The user is not defined',
+        });
+      } else {
+        const comparePassword = await bcrypt.compareSync(password, checkUser.password);
 
-              if(!comparePassword) {
-                  resolve({
-                      status: 'ERR',
-                      message: 'Password error',
-                  })
-              }else {
+        if (!comparePassword) {
+          resolve({
+            status: 'ERR',
+            message: 'Password error',
+          });
+        } else {
+          const access_token = await generalAccessToken({
+            id: checkUser.id,
+            isAdmin: checkUser.isAdmin,
+          });
 
-                  const access_token = await generalAccessToken({
-                      id: checkUser.id,
-                      isAdmin: checkUser.isAdmin
-                  })
+          const refresh_token = await generalRefreshToken({
+            id: checkUser.id,
+            isAdmin: checkUser.isAdmin,
+          });
 
-                  const refresh_token = await generalRefreshToken({
-                      id: checkUser.id,
-                      isAdmin: checkUser.isAdmin
-                  })
-                   
-                  resolve({
-                      status: 'OK',
-                      message: 'Login success',
-                      access_token,
-                      refresh_token
-                  })
-              }
-          }
-      } catch (e) {
-          reject(e)
+          resolve({
+            status: 'OK',
+            message: 'Login success',
+            access_token,
+            refresh_token,
+          });
+        }
       }
-  })
-}
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const getDetailUser = (idUser) => {
   return new Promise(async (resolve, reject) => {
-      try {
-         if(!idUser) {
-              resolve({
-                  status: 'ERR',
-                  message: "Data is null",
-              })
-         }
-
-         let user = await User.findOne({
-              _id: idUser
-         })
-
-         if(!user) {
-              resolve({
-                  status: 'ERR',
-                  message: "User is not exits",
-              })
-         }else {
-              resolve({
-                  status: 'OK',
-                  message: "Get detail user success",
-                  data: user
-              })
-         }
-      } catch (e) {
-          reject(e)
+    try {
+      if (!idUser) {
+        resolve({
+          status: 'ERR',
+          message: 'Data is null',
+        });
       }
-  })
-}
+
+      let user = await User.findOne({
+        _id: idUser,
+      });
+
+      if (!user) {
+        resolve({
+          status: 'ERR',
+          message: 'User is not exits',
+        });
+      } else {
+        resolve({
+          status: 'OK',
+          message: 'Get detail user success',
+          data: user,
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const getDetailUserClient = (idUser) => {
   return new Promise(async (resolve, reject) => {
-      try {
-         if(!idUser) {
-              resolve({
-                  status: 'ERR',
-                  message: "Data is null",
-              })
-         }
-
-         let user = await User.findOne({
-              _id: idUser
-         })
-
-         if(!user) {
-              resolve({
-                  status: 'ERR',
-                  message: "User is not exits",
-              })
-         }else {
-              resolve({
-                  status: 'OK',
-                  message: "Get detail user success",
-                  data: user
-              })
-         }
-      } catch (e) {
-          reject(e)
+    try {
+      if (!idUser) {
+        resolve({
+          status: 'ERR',
+          message: 'Data is null',
+        });
       }
-  })
-}
+
+      let user = await User.findOne({
+        _id: idUser,
+      });
+
+      if (!user) {
+        resolve({
+          status: 'ERR',
+          message: 'User is not exits',
+        });
+      } else {
+        resolve({
+          status: 'OK',
+          message: 'Get detail user success',
+          data: user,
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const updatePassword = (id, currentPassword, newPassword) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          if(!id || !currentPassword || !newPassword) {
-              resolve({
-                  status: 'ERR',
-                  message: 'Data user is null'
-              })
-          }
-
-          const checkUser = await User.findOne({
-              _id: id
-          })
-
-          if(!checkUser) {
-              resolve({
-                  status: 'ERR',
-                  message: 'The user is not defined'
-              })
-          }else {
-              const compareCurrentPassword = await bcrypt.compareSync(currentPassword, checkUser.password)
-              if(!compareCurrentPassword) {
-                  resolve({
-                      status: 'ERR',
-                      message: 'Verify password current is false',
-                  })
-              }
-
-              const comparePassword = bcrypt.compareSync(newPassword, checkUser.password)
-
-              if(comparePassword) {
-                  resolve({
-                      status: 'ERR',
-                      message: 'Nothing changes',
-                  })
-              }else {
-                  const hash = bcrypt.hashSync(newPassword, 10)
-
-                  const update = await User.findByIdAndUpdate(id, {
-                      'password': hash
-                  }, { new: true })
-                   
-                  resolve({
-                      status: 'OK',
-                      message: 'Update password success',
-                      update
-                  })
-              }
-          }
-          
-
-      } catch (e) {
-          reject(e)
+    try {
+      if (!id || !currentPassword || !newPassword) {
+        resolve({
+          status: 'ERR',
+          message: 'Data user is null',
+        });
       }
-  })
-}
+
+      const checkUser = await User.findOne({
+        _id: id,
+      });
+
+      if (!checkUser) {
+        resolve({
+          status: 'ERR',
+          message: 'The user is not defined',
+        });
+      } else {
+        const compareCurrentPassword = await bcrypt.compareSync(
+          currentPassword,
+          checkUser.password
+        );
+        if (!compareCurrentPassword) {
+          resolve({
+            status: 'ERR',
+            message: 'Verify password current is false',
+          });
+        }
+
+        const comparePassword = bcrypt.compareSync(newPassword, checkUser.password);
+
+        if (comparePassword) {
+          resolve({
+            status: 'ERR',
+            message: 'Nothing changes',
+          });
+        } else {
+          const hash = bcrypt.hashSync(newPassword, 10);
+
+          const update = await User.findByIdAndUpdate(
+            id,
+            {
+              password: hash,
+            },
+            { new: true }
+          );
+
+          resolve({
+            status: 'OK',
+            message: 'Update password success',
+            update,
+          });
+        }
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const lockUserAccount = (userId, type, lockDuration, lockReason) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if(!userId || !type || !lockDuration) {
+      if (!userId || !type || !lockDuration) {
         resolve({
           status: 'ERR',
-          message: "Data is null"
-      })
+          message: 'Data is null',
+        });
       }
       const lockUntil = new Date();
-      let lockDurationInMinutes = 0
-      if(type === "minutes") {
-        lockDurationInMinutes = lockDuration
-      }else if(type === "hours"){
+      let lockDurationInMinutes = 0;
+      if (type === 'minutes') {
+        lockDurationInMinutes = lockDuration;
+      } else if (type === 'hours') {
         lockDurationInMinutes = parseInt(lockDuration) * 60;
-      }else {
+      } else {
         lockDurationInMinutes = parseInt(lockDuration) * 24 * 60;
       }
-      
+
       lockUntil.setMinutes(lockUntil.getMinutes() + lockDurationInMinutes);
-      
+
       await User.findByIdAndUpdate(userId, {
         accountLock: {
           isLocked: true,
           lockUntil: lockUntil,
-          lockReason: lockReason
-        }
+          lockReason: lockReason,
+        },
       });
-    
+
       resolve({
         status: 'OK',
-        message: 'Khóa tài khoản thành công'
-    })
+        message: 'Khóa tài khoản thành công',
+      });
     } catch (error) {
       resolve({
         status: 'ERR',
-        error
-    })
+        error,
+      });
     }
-  })
-}
+  });
+};
 
 const checkAccountStatus = async (req, res, next) => {
   const { email } = req.body;
-  const user = await User.findOne({ email: email});
-  
+  const user = await User.findOne({ email: email });
+
   if (!user) {
-    return res.status(200).json({ 
+    return res.status(200).json({
       status: 'ERR',
-      message: 'Người dùng không tồn tại' });
+      message: 'Người dùng không tồn tại',
+    });
   }
 
   const { isLocked, lockUntil, lockReason } = user.accountLock;
 
   if (isLocked && lockUntil > new Date()) {
-    return res.status(200).json({ 
-      status: "E1",
-      message: `Tài khoản của bạn đang bị khóa trong thời gian ${lockUntil} phút. Lý do: ${lockReason}` 
+    return res.status(200).json({
+      status: 'E1',
+      message: `Tài khoản của bạn đang bị khóa trong thời gian ${lockUntil} phút. Lý do: ${lockReason}`,
     });
   } else if (isLocked && lockUntil <= new Date()) {
     await User.findByIdAndUpdate(user.id, {
       'accountLock.isLocked': false,
       'accountLock.lockUntil': null,
-      'accountLock.lockReason': ''
+      'accountLock.lockReason': '',
     });
   }
 
@@ -556,5 +566,5 @@ module.exports = {
   getDetailUserClient,
   updateUserService,
   lockUserAccount,
-  checkAccountStatus
+  checkAccountStatus,
 };

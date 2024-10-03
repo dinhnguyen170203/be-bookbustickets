@@ -18,6 +18,7 @@ const insertOtp = ({ otp, email, hashPassword, name }) => {
         resolve({
           data: createOtp,
         });
+        return;
       }
     } catch (error) {
       reject(error);

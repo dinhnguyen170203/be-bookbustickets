@@ -14,18 +14,18 @@ const createUser = async (req, res) => {
 };
 const logoutUser = async (req, res) => {
   try {
-      res.clearCookie('refresh_token')
-      return res.status(200).json({
-          status: 'OK',
-          message: 'Logout successfully'
-      })
+    res.clearCookie('refresh_token');
+    return res.status(200).json({
+      status: 'OK',
+      message: 'Logout successfully',
+    });
   } catch (err) {
-      return res.status(404).json({
-          message: 'err from server',
-          error: err
-      })
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
   }
-}
+};
 const updateUser = async (req, res) => {
   try {
     const fileData = req.file;
@@ -43,7 +43,7 @@ const updateUser = async (req, res) => {
 const updateUserService = async (req, res) => {
   try {
     let user = req.body;
-    
+
     let responve = await UserService.updateUserService(user);
     return res.status(200).json(responve);
   } catch (error) {
@@ -85,131 +85,131 @@ const getAllUser = async (req, res) => {
   }
 };
 
-const registerUser =  async (req, res) => {
+const registerUser = async (req, res) => {
   try {
-      let user = req.body
-      let responve = await UserService.registerUser(user)
-      return res.status(200).json(responve)
+    let user = req.body;
+    let responve = await UserService.registerUser(user);
+    return res.status(200).json(responve);
   } catch (error) {
-      return res.status(404).json({
-          status: 'ERR',
-          message: 'ERROR FROM SERVER'
-      })
+    console.log('err register.Controller', error);
+    return res.status(404).json({
+      status: 'ERR',
+      message: 'ERROR FROM SERVER',
+    });
   }
-}
+};
 const verifyEmail = async (req, res) => {
   try {
-      let { otp, email} = req.body
-      let responve = await UserService.verifyEmail(email, otp)
-      return res.status(200).json(responve)
-
+    let { otp, email } = req.body;
+    let responve = await UserService.verifyEmail(email, otp);
+    return res.status(200).json(responve);
   } catch (error) {
-      return res.status(404).json({
-          status: 'ERR',
-          message: 'ERROR FROM SERVER'
-      })
+    return res.status(404).json({
+      status: 'ERR',
+      message: 'ERROR FROM SERVER',
+    });
   }
-}
+};
 
 const loginUser = async (req, res) => {
   try {
-      const { email, password } = req.body
-      const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
-      const isCheckEmail = reg.test(email)
-      
-      if(!email || !password) {
-          return res.status(200).json({
-              status: 'ERR',
-              message: 'The input is required'
-          })
-      }
-      
-      if(!isCheckEmail) {
-          return res.status(200).json({
-              status: 'ERR',
-              message: 'Email error'
-          })
-      }
+    const { email, password } = req.body;
+    const reg = /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+    const isCheckEmail = reg.test(email);
 
-      let data = await UserService.loginUser(req.body)
-      const {refresh_token, ...newData} = data
+    if (!email || !password) {
+      return res.status(200).json({
+        status: 'ERR',
+        message: 'The input is required',
+      });
+    }
 
-      res.cookie('refresh_token', refresh_token,  {
-          httpOnly: true,
-          secure: false,
-          samsite: 'strict'
-      })
-      return res.status(200).json(data)
+    if (!isCheckEmail) {
+      return res.status(200).json({
+        status: 'ERR',
+        message: 'Email error',
+      });
+    }
+
+    let data = await UserService.loginUser(req.body);
+    const { refresh_token, ...newData } = data;
+
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,
+      secure: false,
+      samsite: 'strict',
+    });
+    return res.status(200).json(data);
   } catch (err) {
-      return res.status(404).json({
-          message: 'err from server',
-          error: err
-      })
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
   }
-}
+};
 
 const refreshToken = async (req, res) => {
   try {
-      let token = req.headers.token.split(' ')[1]
-      if(!token) {
-          return res.status(200).json({
-              status: 'ERR',
-              message: 'Token is not defined'
-          })
-      }
-      const data = await JwtService.refreshTokenJwtService(token)
-      return res.status(200).json(data)
+    let token = req.headers.token.split(' ')[1];
+    if (!token) {
+      return res.status(200).json({
+        status: 'ERR',
+        message: 'Token is not defined',
+      });
+    }
+    const data = await JwtService.refreshTokenJwtService(token);
+    return res.status(200).json(data);
   } catch (err) {
-      return res.status(404).json({
-          message: 'err from server',
-          error: err
-      })
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
   }
-}
+};
 
 const getDetailUser = async (req, res) => {
   try {
-      let {id} = req.params
-      const data = await UserService.getDetailUser(id)
-      return res.status(200).json(data)
+    let { id } = req.params;
+    const data = await UserService.getDetailUser(id);
+    return res.status(200).json(data);
   } catch (err) {
-      return res.status(404).json({
-          message: 'err from server',
-          error: err
-      })
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
   }
-}
+};
 
 const getDetailUserClient = async (req, res) => {
   try {
-      let {id} = req.params
-      const data = await UserService.getDetailUserClient(id)
-      return res.status(200).json(data)
+    let { id } = req.params;
+    const data = await UserService.getDetailUserClient(id);
+    return res.status(200).json(data);
   } catch (err) {
-      return res.status(404).json({
-          message: 'err from server',
-          error: err
-      })
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
   }
-}
+};
 
 const updatePassword = async (req, res) => {
   try {
-      const { id, currentPassword, newPassword } = req.body
-      let data = await UserService.updatePassword(id, currentPassword, newPassword)
+    const { id, currentPassword, newPassword } = req.body;
+    let data = await UserService.updatePassword(id, currentPassword, newPassword);
 
-      return res.status(200).json(data)
+    return res.status(200).json(data);
   } catch (err) {
-      return res.status(404).json({
-          message: 'err from server',
-          error: err
-      })
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
   }
-}
+};
 
 const lockUserAccount = async (req, res) => {
   try {
-    let {userId, type, lockDuration, lockReason} = req.body;
+    let { userId, type, lockDuration, lockReason } = req.body;
 
     let responve = await UserService.lockUserAccount(userId, type, lockDuration, lockReason);
     return res.status(200).json(responve);
@@ -235,5 +235,5 @@ module.exports = {
   getDetailUserClient,
   updateUserService,
   logoutUser,
-  lockUserAccount
+  lockUserAccount,
 };
