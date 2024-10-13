@@ -25,7 +25,9 @@ app.use(cookieParser());
 routes(app);
 
 mongoose
-  .connect(`mongodb+srv://lanngo:tU5hkXyJSYAEAHXQ@cluster0.r6ghe.mongodb.net/`)
+  .connect(
+    `mongodb+srv://lanngo:lanngo1@cluster0.rgvps.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+  )
   .then(() => {
     console.log('Connnect db success');
   })

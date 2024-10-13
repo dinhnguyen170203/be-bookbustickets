@@ -98,6 +98,7 @@ const registerUser = async (req, res) => {
     });
   }
 };
+
 const verifyEmail = async (req, res) => {
   try {
     let { otp, email } = req.body;
@@ -220,7 +221,47 @@ const lockUserAccount = async (req, res) => {
     });
   }
 };
+const forgotPassword = async (req, res) => {
+  try {
+    const email = req.body;
+    if (!email) {
+      return res.status(400).json({ status: 'ERR', message: 'Email is required' });
+    }
 
+    const response = await UserService.forgotPassword({ email });
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      status: 'ERR',
+      message: 'Internal Server Error',
+      error: error.message,
+    });
+  }
+};
+const verifyEmailForgotPassword = async (req, res) => {
+  try {
+    let { otp, email } = req.body;
+    let responve = await UserService.verifyEmailForgotPassword(email, otp);
+    return res.status(200).json(responve);
+  } catch (error) {
+    return res.status(404).json({
+      status: 'ERR',
+      message: 'ERROR FROM SERVER',
+    });
+  }
+};
+const createNewPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    let data = await UserService.createNewPassword(email, newPassword);
+    return res.status(200).json(data);
+  } catch (err) {
+    return res.status(404).json({
+      message: 'err from server',
+      error: err,
+    });
+  }
+};
 module.exports = {
   createUser,
   updateUser,
@@ -236,4 +277,7 @@ module.exports = {
   updateUserService,
   logoutUser,
   lockUserAccount,
+  forgotPassword,
+  verifyEmailForgotPassword,
+  createNewPassword,
 };

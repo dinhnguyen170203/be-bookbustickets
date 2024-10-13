@@ -17,7 +17,6 @@ let sendOtpEmail = async ({ email, otp }) => {
 
   try {
     let info = await transporter.sendMail({
-      // from: `"Vexe" <${process.env.EMAIL || 'yudlinh0810@gmail.com'}>`,
       to: email,
       subject: 'Thông tin xác thực email',
       html: getBodyHTMLEmail(otp),
@@ -34,10 +33,8 @@ let sendOtpEmail = async ({ email, otp }) => {
 let getBodyHTMLEmail = (otp) => {
   let result = `
         <h3>Mã xác thực email: Chỉ sử dụng một lần!</h3>
-        <p>Bạn nhận được email này vì bạn đã đăng ký tài khoản tại Vexe.</p>
         <p>Vui lòng nhập mã sau để xác minh:</p>
         <div><b>${otp}</b></div>
-        <div>Nếu bạn không yêu cầu thay đổi này, vui lòng thay đổi mật khẩu hoặc liên hệ với chúng tôi.</div>
         <div>Xin chân thành cảm ơn!</div>
     `;
   return result;

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/UserModel');
 const Otp = require('../models/OtpModel');
 const otpGenerator = require('otp-generator');
-const { insertOtp, isValidOtp } = require('./OtpService');
+const { insertOtp, isValidOtp, insertOtpForgotPassword } = require('./OtpService');
 const { sendOtpEmail } = require('./EmailService');
 const { generalAccessToken, generalRefreshToken } = require('./JwtService');
 const cloudinary = require('cloudinary').v2;
@@ -553,6 +553,120 @@ const checkAccountStatus = async (req, res, next) => {
   next();
 };
 
+const forgotPassword = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const email = Object.keys(data.email)[0];
+      if (!email) {
+        resolve({ status: 'ERR', message: 'Email is required' });
+        return;
+      }
+
+      const checkUser = await User.findOne({ email: email });
+      if (!checkUser) {
+        resolve({ status: 'ERR', message: 'User does not exist' });
+        return;
+      }
+
+      const otp = otpGenerator.generate(6, {
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+      });
+
+      await insertOtpForgotPassword({ otp, email });
+      await sendOtpEmail({ email, otp });
+
+      resolve({ status: 'OK', message: 'OTP created and sent', otp });
+    } catch (error) {
+      reject({ status: 'ERR', message: 'Failed process forgot password', error });
+    }
+  });
+};
+const verifyEmailForgotPassword = (email, otp) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const checkOtp = await Otp.find({
+        email,
+      });
+
+      if (!checkOtp.length) {
+        resolve({
+          status: 'ERR',
+          message: 'Email and otp not exist',
+        });
+      }
+
+      const lastOtp = checkOtp[checkOtp.length - 1];
+
+      const isValid = await isValidOtp(otp, lastOtp.otp);
+
+      if (!isValid) {
+        resolve({
+          status: 'ERR',
+          message: 'Verify email ERROR',
+        });
+        return;
+      }
+
+      if (isValid && email === lastOtp.email) {
+        await Otp.deleteMany({
+          email,
+        });
+
+        resolve({
+          status: 'OK',
+        });
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const createNewPassword = (email, newPassword) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!email || !newPassword) {
+        resolve({
+          status: 'ERR',
+          message: 'Data user is null',
+        });
+      }
+
+      const checkUser = await User.findOne({
+        email: email,
+      });
+
+      if (!checkUser) {
+        resolve({
+          status: 'ERR',
+          message: 'The user is not defined',
+        });
+      }
+      const userId = checkUser._id;
+      const hash = bcrypt.hashSync(newPassword, 10);
+
+      const update = await User.findByIdAndUpdate(
+        userId,
+        {
+          password: hash,
+        },
+        { new: true }
+      );
+
+      resolve({
+        status: 'OK',
+        message: 'Update password success',
+        update,
+      });
+    } catch (e) {
+      console.log('err service createNewPassword', e);
+      reject(e);
+    }
+  });
+};
 module.exports = {
   createUser,
   updateUser,
@@ -567,4 +681,7 @@ module.exports = {
   updateUserService,
   lockUserAccount,
   checkAccountStatus,
+  forgotPassword,
+  verifyEmailForgotPassword,
+  createNewPassword,
 };
